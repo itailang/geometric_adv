@@ -122,9 +122,9 @@ for i in range(len(pc_classes)):
     start_time = time.time()
 
     # prepare target point clouds
-    source_pc, target_pc = prepare_data_for_attack(pc_classes, [pc_class_name], classes_for_target, point_clouds, slice_idx, attack_pc_idx, conf.num_pc_for_target, conf.target_pc_idx_type, nn_idx, correct_pred)
-    _, target_ae_loss_ref = prepare_data_for_attack(pc_classes, [pc_class_name], classes_for_target, ae_loss, slice_idx, attack_pc_idx, conf.num_pc_for_target, conf.target_pc_idx_type, nn_idx, correct_pred)
-    _, target_recon_ref = prepare_data_for_attack(pc_classes, [pc_class_name], classes_for_target, reconstructions, slice_idx, attack_pc_idx, conf.num_pc_for_target, conf.target_pc_idx_type, nn_idx, correct_pred)
+    source_pc, target_pc = prepare_data_for_attack(pc_classes, [pc_class_name], classes_for_target, point_clouds, slice_idx, attack_pc_idx, conf.num_pc_for_target, nn_idx, correct_pred)
+    _, target_ae_loss_ref = prepare_data_for_attack(pc_classes, [pc_class_name], classes_for_target, ae_loss, slice_idx, attack_pc_idx, conf.num_pc_for_target, nn_idx, correct_pred)
+    _, target_recon_ref = prepare_data_for_attack(pc_classes, [pc_class_name], classes_for_target, reconstructions, slice_idx, attack_pc_idx, conf.num_pc_for_target, nn_idx, correct_pred)
 
     target_ae_loss_ref = target_ae_loss_ref.reshape(-1)
 

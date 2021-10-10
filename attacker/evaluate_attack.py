@@ -28,7 +28,6 @@ from src.general_utils import plot_3d_point_cloud, plot_heatmap_graph
 parser = argparse.ArgumentParser()
 parser.add_argument('--ae_folder', type=str, default='log/autoencoder_victim', help='Folder for loading a trained autoencoder model [default: log/autoencoder_victim]')
 parser.add_argument("--attack_pc_idx", type=str, default='log/autoencoder_victim/eval/sel_idx_rand_100_test_set_13l.npy', help="List of indices of point clouds for the attack")
-parser.add_argument("--source_target_score_type", type=str, default='norm', help="Score type for the source and target pairs [default: norm]")
 parser.add_argument("--output_folder_name", type=str, default='attack_res', help="Output folder name")
 parser.add_argument('--save_graphs', type=int, default=0, help='1: Save statistics graphs, 0: Do not save statistics graphs [default: 0]')
 parser.add_argument('--save_pc_plots', type=int, default=0, help='1: Save point cloud plots, 0: Do not save point cloud plots [default: 0]')
@@ -156,7 +155,7 @@ for i in range(len(pc_classes)):
     num_outlier = np.sum(adversarial_pc_input_dists > outlier_thresh, axis=-1).astype(np.int16)
 
     # best dist weight (minimal source chamfer target chamfer norm)
-    source_target_norm = np.sqrt(np.square(source_chamfer_dist) + np.square(target_recon_error))
+    source_target_norm = source_chamfer_dist + target_recon_error
     source_target_norm_min_val = np.min(source_target_norm, axis=0)
     source_target_norm_min_idx = np.argmin(source_target_norm, axis=0)
 

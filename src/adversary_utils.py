@@ -23,7 +23,7 @@ def load_data(data_path, file_list, base_name_list):
     return data_list
 
 
-def prepare_data_for_attack(pc_classes, source_classes_for_attack, target_classes_for_attack, classes_data, slice_idx, attack_pc_idx, num_pc_for_target, target_pc_idx_type, nn_idx_mat, correct_pred):
+def prepare_data_for_attack(pc_classes, source_classes_for_attack, target_classes_for_attack, classes_data, slice_idx, attack_pc_idx, num_pc_for_target, nn_idx_mat, correct_pred):
     num_classes = len(pc_classes)
 
     source_data_list = []
@@ -195,7 +195,7 @@ def write_attack_statistics_to_file(fout, classes_for_attack, source_target_norm
         spaces = ''.join([' '] * (16 - len(pc_class_name)))
         fout.write('%s%s%.5f\t\t%03d\t\t%.5f\t\t%.5f\t\t%.2f\n' %
                    (pc_class_name, spaces, source_target_norm_min_mean,
-                    num_outlier_at_norm_min_mean, source_chamfer_at_norm_min_mean,
+                    int(num_outlier_at_norm_min_mean + 0.5), source_chamfer_at_norm_min_mean,
                     target_chamfer_at_norm_min_mean, target_nre_at_norm_min_mean))
 
     # over classes statistics
@@ -215,7 +215,7 @@ def write_attack_statistics_to_file(fout, classes_for_attack, source_target_norm
     spaces = ''.join([' '] * (16 - len(pc_class_name)))
     fout.write('%s%s%.5f\t\t%03d\t\t%.5f\t\t%.5f\t\t%.2f\n' %
                (pc_class_name, spaces, source_target_norm_min_classes_mean,
-                num_outlier_at_norm_min_classes_mean, source_chamfer_at_norm_min_classes_mean,
+                int(num_outlier_at_norm_min_classes_mean + 0.5), source_chamfer_at_norm_min_classes_mean,
                 target_chamfer_at_norm_min_classes_mean, target_nre_at_norm_min_classes_mean))
 
 

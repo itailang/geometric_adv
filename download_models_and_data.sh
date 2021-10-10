@@ -9,7 +9,7 @@ function google_drive_download()
 }
 
 # download models
-google_drive_download 1qP9BehCpwrWFX49a5ID5Kqo_P7mUzUoB log.zip
+google_drive_download 1gV4lxrO40oYDMAKhGIEj0TFcwEHU_Bq9 log.zip
 unzip log.zip
 rm log.zip
 

@@ -27,10 +27,10 @@ parser.add_argument('--model', default='pointnet_cls', help='Model name: pointne
 parser.add_argument('--batch_size', type=int, default=2, help='Batch Size during training [default: 2]')
 parser.add_argument('--num_point', type=int, default=2048, help='Point Number [256/512/1024/2048] [default: 2048]')
 parser.add_argument('--num_classes', type=int, default=13, help='Number of classes [default: 13]')
-parser.add_argument('--model_path', default='log/pointnet/model-140.ckpt', help='model checkpoint file path [default: log/pointnet/model-140.ckpt]')
+parser.add_argument('--model_path', default='log/pointnet/model-150.ckpt', help='model checkpoint file path [default: log/pointnet/model-150.ckpt]')
 parser.add_argument('--dump_dir', default='log/pointnet/log_test', help='dump folder path [log/pointnet/test_log]')
-parser.add_argument('--test_data', type=str, default='log/autoencoder_victim/eval/reconstructions_test_set_13l.npy',
-                    help='Path to test data [default: log/autoencoder_victim/eval/reconstructions_test_set_13l.npy]')
+parser.add_argument('--test_data', type=str, default='log/autoencoder_victim/eval/point_clouds_test_set_13l.npy',
+                    help='Path to test data [default: log/autoencoder_victim/eval/point_clouds_test_set_13l.npy]')
 parser.add_argument('--test_labels', type=str, default='log/autoencoder_victim/eval/pc_label_test_set_13l.npy',
                     help='Path to test data [default: log/autoencoder_victim/eval/pc_label_test_set_13l.npy]')
 parser.add_argument('--pc_classes', type=str, default='log/autoencoder_victim/eval/pc_classes_13l.npy',

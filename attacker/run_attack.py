@@ -28,7 +28,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--learning_rate', type=float, default=0.01, help='Learning rate for the attack [default: 0.01]')
 parser.add_argument('--loss_dist_type', type=str, default='chamfer', help='Type of distance regularization loss [default: chamfer]')
 parser.add_argument('--loss_adv_type', type=str, default='chamfer', help='Type of adversarial loss [default: chamfer]')
-parser.add_argument('--dist_weight_list', nargs='+', default=[0.5, 1, 5], help='List of possible weights for distance regularization loss')
+parser.add_argument('--dist_weight_list', nargs='+', default=[1.0], help='List of possible weights for distance regularization loss')
 parser.add_argument('--max_point_pert_weight', type=float, default=0.0, help='Weight for maximal point perturbation loss [default: [0.0]]')
 parser.add_argument('--max_point_dist_weight', type=float, default=0.0, help='Weight for maximal point nearest neighbor distance loss [default: [0.0]]')
 parser.add_argument('--num_iterations', type=int, default=500, help='Number of iterations per dist_weight [default: 500]')
@@ -124,9 +124,9 @@ for i in range(len(pc_classes)):
     save_dir = create_dir(osp.join(conf.train_dir, pc_class_name))
 
     # prepare data for attack
-    source_pc, target_pc = prepare_data_for_attack(pc_classes, [pc_class_name], classes_for_target, point_clouds, slice_idx, attack_pc_idx, flags.num_pc_for_target, flags.target_pc_idx_type, nn_idx, correct_pred)
-    _, target_latent = prepare_data_for_attack(pc_classes, [pc_class_name], classes_for_target, latent_vectors, slice_idx, attack_pc_idx, flags.num_pc_for_target, flags.target_pc_idx_type, nn_idx, correct_pred)
-    _, target_ae_loss_ref = prepare_data_for_attack(pc_classes, [pc_class_name], classes_for_target, ae_loss, slice_idx, attack_pc_idx, flags.num_pc_for_target, flags.target_pc_idx_type, nn_idx, correct_pred)
+    source_pc, target_pc = prepare_data_for_attack(pc_classes, [pc_class_name], classes_for_target, point_clouds, slice_idx, attack_pc_idx, flags.num_pc_for_target, nn_idx, correct_pred)
+    _, target_latent = prepare_data_for_attack(pc_classes, [pc_class_name], classes_for_target, latent_vectors, slice_idx, attack_pc_idx, flags.num_pc_for_target, nn_idx, correct_pred)
+    _, target_ae_loss_ref = prepare_data_for_attack(pc_classes, [pc_class_name], classes_for_target, ae_loss, slice_idx, attack_pc_idx, flags.num_pc_for_target, nn_idx, correct_pred)
 
     target_ae_loss_ref = target_ae_loss_ref.reshape(-1)
 

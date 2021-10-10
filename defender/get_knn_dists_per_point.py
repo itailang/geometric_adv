@@ -91,7 +91,7 @@ for i in range(len(pc_classes)):
     start_time = time.time()
 
     # prepare data for attack
-    source_pc, _ = prepare_data_for_attack(pc_classes, [pc_class_name], classes_for_target, point_clouds, slice_idx, attack_pc_idx, conf.num_pc_for_target, conf.target_pc_idx_type, nn_idx, correct_pred)
+    source_pc, _ = prepare_data_for_attack(pc_classes, [pc_class_name], classes_for_target, point_clouds, slice_idx, attack_pc_idx, conf.num_pc_for_target, nn_idx, correct_pred)
 
     # load data
     load_dir = osp.join(attack_dir, pc_class_name)

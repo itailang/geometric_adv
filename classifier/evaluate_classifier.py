@@ -24,8 +24,8 @@ from src.general_utils import plot_heatmap_graph, plot_3d_point_cloud
 
 # Command line arguments
 parser = argparse.ArgumentParser()
-parser.add_argument('--classifier_folder', type=str, default='log/pointnet', help='Folder of the classifier to be used [default: log/pointnet]')
 parser.add_argument('--data_type', type=str, default='adversarial', help='Data type to be classified [default: adversarial]')
+parser.add_argument('--classification_type', type=str, default='hit_target', help='Type of classification [default: hit_target]')
 parser.add_argument('--ae_folder', type=str, default='log/autoencoder_victim', help='Folder for loading a trained autoencoder model [default: log/autoencoder_victim]')
 parser.add_argument("--attack_pc_idx", type=str, default='log/autoencoder_victim/eval/sel_idx_rand_100_test_set_13l.npy', help="List of indices of point clouds for the attack")
 parser.add_argument('--attack_folder', type=str, default='attack_res', help='Folder for loading attack data')
@@ -37,6 +37,7 @@ flags = parser.parse_args()
 print('Evaluate classifier flags:', flags)
 
 assert flags.data_type in ['target', 'adversarial', 'source', 'before_defense', 'after_defense'], 'wrong data_type: %s.' % flags.data_type
+assert flags.classification_type in ['hit_target', 'avoid_source'], 'wrong classification_type: %s.' % flags.classification_type
 
 # define basic parameters
 top_out_dir = osp.dirname(osp.dirname(osp.abspath(__file__)))  # Use to save Neural-Net check-points etc.
@@ -56,20 +57,23 @@ elif flags.data_type == 'before_defense':
     output_path = create_dir(osp.join(attack_path, flags.defense_folder, flags.output_folder_name))
 elif flags.data_type == 'after_defense':
     output_path = create_dir(osp.join(attack_path, flags.defense_folder, flags.output_folder_name))
+else:
+    assert False, 'wrong data_type: %s' % flags.data_type
 
 # load attack configuration
 conf = Conf.load(osp.join(attack_path, 'attack_configuration'))
 
 # load data
-point_clouds, latent_vectors, reconstructions, pc_classes, slice_idx, pc_labels, pc_pred_labels = \
+point_clouds, latent_vectors, reconstructions, pc_classes, slice_idx, pc_labels = \
     load_data(data_path, files, ['point_clouds_test_set', 'latent_vectors_test_set', 'reconstructions_test_set',
-                                 'pc_classes', 'slice_idx_test_set', 'pc_label_test_set', 'pc_pred_labels_test_set'])
+                                 'pc_classes', 'slice_idx_test_set', 'pc_label_test_set'])
 
 nn_idx_dict = {'latent_nn': 'latent_nn_idx_test_set', 'chamfer_nn_complete': 'chamfer_nn_idx_complete_test_set'}
 nn_idx = load_data(data_path, files, [nn_idx_dict[conf.target_pc_idx_type]])
 
 correct_pred = None
 if conf.correct_pred_only:
+    pc_pred_labels = load_data(data_path, files, ['pc_pred_labels_test_set'])
     correct_pred = (pc_labels == pc_pred_labels)
 
 # load indices for attack
@@ -87,6 +91,9 @@ if flags.data_type == 'before_defense':
 elif flags.data_type == 'after_defense':
     ftar_name = 'targeted_attacks_after_defense.txt'
     funtar_name = 'untargeted_attacks_after_defense.txt'
+elif flags.data_type != 'source':
+    ftar_name = 'targeted_attacks_%s.txt' % flags.classification_type
+    funtar_name = 'untargeted_attacks_%s.txt' % flags.classification_type
 else:
     ftar_name = 'targeted_attacks.txt'
     funtar_name = 'untargeted_attacks.txt'
@@ -124,33 +131,46 @@ for i in range(len(pc_classes)):
     num_points = adversarial_pc_input.shape[2]
 
     # load classification data and pc labels
-    source_recon_ref, target_recon_ref = prepare_data_for_attack(pc_classes, [pc_class_name], classes_for_target, reconstructions, slice_idx, attack_pc_idx, conf.num_pc_for_target, conf.target_pc_idx_type, nn_idx, correct_pred)
-    source_pc_labels, target_pc_labels = prepare_data_for_attack(pc_classes, [pc_class_name], classes_for_target, pc_labels, slice_idx, attack_pc_idx, conf.num_pc_for_target, conf.target_pc_idx_type, nn_idx, correct_pred)
-    source_pc_pred_labels, target_pc_pred_labels = prepare_data_for_attack(pc_classes, [pc_class_name], classes_for_target, pc_pred_labels, slice_idx, attack_pc_idx, conf.num_pc_for_target, conf.target_pc_idx_type, nn_idx, correct_pred)
+    source_recon_ref, target_recon_ref = prepare_data_for_attack(pc_classes, [pc_class_name], classes_for_target, reconstructions, slice_idx, attack_pc_idx, conf.num_pc_for_target, nn_idx, correct_pred)
+    source_pc_labels, target_pc_labels = prepare_data_for_attack(pc_classes, [pc_class_name], classes_for_target, pc_labels, slice_idx, attack_pc_idx, conf.num_pc_for_target, nn_idx, correct_pred)
 
     source_pc_labels = source_pc_labels.reshape(-1)
     target_pc_labels = target_pc_labels.reshape(-1)
-    source_pc_pred_labels = source_pc_pred_labels.reshape(-1)
-    target_pc_pred_labels = target_pc_pred_labels.reshape(-1)
 
     load_dir_classifier = osp.join(output_path, pc_class_name)
 
     if flags.data_type == 'target':
-        target_recon_ref_cls_correct = np.equal(target_pc_pred_labels, target_pc_labels)
-        pc_recon_cls_correct = np.vstack([np.expand_dims(target_recon_ref_cls_correct, axis=0)] * num_dist_weight)
+        target_pc_recon_pred = np.load(osp.join(load_dir_classifier, 'target_pc_recon_pred.npy'))
+        pc_pred_label = target_pc_recon_pred
+        if flags.classification_type == 'hit_target':
+            pc_label = target_pc_labels
+            pc_recon_cls_correct = np.equal(pc_pred_label, pc_label)
+        else:
+            pc_label = source_pc_labels
+            pc_recon_cls_correct = np.not_equal(pc_pred_label, pc_label)
+        pc_recon_cls_correct = np.vstack([pc_recon_cls_correct] * num_dist_weight)
     elif flags.data_type == 'adversarial':
         adversarial_pc_recon_pred = np.load(osp.join(load_dir_classifier, 'adversarial_pc_recon_pred.npy'))
-        pc_label = np.vstack([target_pc_labels] * len(adversarial_pc_recon_pred))
-        pc_recon_cls_correct = np.equal(adversarial_pc_recon_pred, pc_label)
-        pc_recon_cls_correct = np.vstack([pc_recon_cls_correct] * round((num_dist_weight / len(pc_recon_cls_correct))))
+        pc_pred_label = adversarial_pc_recon_pred
+        if flags.classification_type == 'hit_target':
+            pc_label = np.vstack([target_pc_labels] * len(pc_pred_label))
+            pc_recon_cls_correct = np.equal(pc_pred_label, pc_label)
+        else:
+            pc_label = np.vstack([source_pc_labels] * len(pc_pred_label))
+            pc_recon_cls_correct = np.not_equal(pc_pred_label, pc_label)
+        pc_recon_cls_correct = np.vstack([pc_recon_cls_correct] * int(num_dist_weight / len(pc_recon_cls_correct)))
     elif flags.data_type == 'source':
-        source_recon_ref_cls_correct = np.equal(source_pc_pred_labels, source_pc_labels)
-        pc_recon_cls_correct = np.vstack([np.expand_dims(source_recon_ref_cls_correct, axis=0)] * num_dist_weight)
+        source_pc_recon_pred = np.load(osp.join(load_dir_classifier, 'source_pc_recon_pred.npy'))
+        pc_pred_label = source_pc_recon_pred
+        pc_label = source_pc_labels
+        source_recon_ref_cls_correct = np.equal(pc_pred_label, pc_label)
+        pc_recon_cls_correct = np.vstack([source_recon_ref_cls_correct] * num_dist_weight)
     elif flags.data_type == 'before_defense':
         adversarial_pc_recon_pred = np.load(osp.join(adversarial_data_path, pc_class_name, 'adversarial_pc_recon_pred.npy'))
-        pc_label = np.vstack([source_pc_labels] * len(adversarial_pc_recon_pred))
-        pc_recon_cls_correct = np.equal(adversarial_pc_recon_pred, pc_label)
-        pc_recon_cls_correct = np.vstack([pc_recon_cls_correct] * round((num_dist_weight / len(pc_recon_cls_correct))))
+        pc_pred_label = adversarial_pc_recon_pred
+        pc_label = np.vstack([source_pc_labels] * len(pc_pred_label))
+        pc_recon_cls_correct = np.equal(pc_pred_label, pc_label)
+        pc_recon_cls_correct = np.vstack([pc_recon_cls_correct] * int(num_dist_weight / len(pc_recon_cls_correct)))
     elif flags.data_type == 'after_defense':
         defense_on_adv = osp.exists(osp.join(load_dir_classifier, 'defended_pc_recon_pred.npy'))
         if defense_on_adv:
@@ -158,10 +178,15 @@ for i in range(len(pc_classes)):
         else:
             defended_pc_recon_pred = np.load(osp.join(load_dir_classifier, 'defended_source_recon_pred.npy'))  # defense on clean input
             defended_pc_recon_pred = np.expand_dims(defended_pc_recon_pred, axis=0)
-        pc_label = np.vstack([source_pc_labels] * len(defended_pc_recon_pred))
-        defended_pc_recon_cls_correct = np.equal(defended_pc_recon_pred, pc_label)
-        defended_pc_recon_cls_correct = np.vstack([defended_pc_recon_cls_correct] * round((num_dist_weight / len(defended_pc_recon_cls_correct))))
-        pc_recon_cls_correct = defended_pc_recon_cls_correct
+        pc_pred_label = defended_pc_recon_pred
+        pc_label = np.vstack([source_pc_labels] * len(pc_pred_label))
+        defended_pc_recon_cls_correct = np.equal(pc_pred_label, pc_label)
+        pc_recon_cls_correct = np.vstack([defended_pc_recon_cls_correct] * int(num_dist_weight / len(defended_pc_recon_cls_correct)))
+    else:
+        assert False, 'wrong data_type: %s' % flags.data_type
+
+    pc_pred_label = np.expand_dims(pc_pred_label, axis=0) if len(pc_pred_label.shape) == 1 else pc_pred_label
+    pc_pred_label = np.vstack([pc_pred_label] * int(num_dist_weight / len(pc_pred_label)))
 
     point_clouds_class = point_clouds[slice_idx[i]:slice_idx[i+1]]
     reconstructions_class = reconstructions[slice_idx[i]:slice_idx[i+1]]
@@ -191,13 +216,7 @@ for i in range(len(pc_classes)):
             pc_recon_cls_correct, source_target_norm_min_idx, source_target_norm_min_per_target_class_idx, source_target_norm_min_target_all_idx)
 
     recon_cls_at_norm_min_per_target_class_list.append(recon_cls_at_norm_min_per_target_class)
-
     recon_cls_at_norm_min_best_target_class_list.append(r_cls_best)
-
-    # matrices for heatmap plots
-    recon_cls_at_norm_min_mat = np.insert(recon_cls_at_norm_min_reshape, i * conf.num_pc_for_target, np.ones([conf.num_pc_for_target, num_instance_for_attack]), axis=1)
-
-    adv_recon_cls_targeted_mat = np.insert(recon_cls_at_norm_min_per_target_class, i * 1, np.ones([1, num_instance_for_attack]), axis=1)
 
     ##################
     # heatmap graphs #
@@ -213,7 +232,8 @@ for i in range(len(pc_classes)):
         rows_label = ['%s_%d' % (s, d) for s, d in zip([pc_class_name] * num_instance_for_attack, idx_range)]
         rows_label_list.append(rows_label)
 
-        # quantities for targeted attack
+        # quantity for targeted attack
+        adv_recon_cls_targeted_mat = np.insert(recon_cls_at_norm_min_per_target_class, i * 1, np.ones([1, num_instance_for_attack]), axis=1)
         if flags.data_type == 'before_defense':
             plot_heatmap_graph(adv_recon_cls_targeted_mat, rows_label, columns_name_insert, pc_class_name, 'Target Class', 'Source Index',
                                '.2f', osp.join(save_dir_graphs, 'targeted_recon_cls_before_defense.png'), (len(columns_name_insert), len(rows_label)))
@@ -268,6 +288,8 @@ if flags.data_type == 'before_defense':
     fout_name = 'eval_stats_before_defense.txt'
 elif flags.data_type == 'after_defense':
     fout_name = 'eval_stats_after_defense.txt'
+elif flags.data_type != 'source':
+    fout_name = 'eval_stats_%s.txt' % flags.classification_type
 else:
     fout_name = 'eval_stats.txt'
 

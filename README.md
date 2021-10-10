@@ -8,7 +8,7 @@ This code repository is based on our [arXiv tech report](https://arxiv.org/abs/2
 
 Deep neural networks are prone to adversarial examples that maliciously alter the network's outcome. Due to the increasing popularity of 3D sensors in safety-critical systems and the vast deployment of deep learning models for 3D point sets, there is a growing interest in adversarial attacks and defenses for such models. So far, the research has focused on the semantic level, namely, deep point cloud classifiers. However, point clouds are also widely used in a geometric-related form that includes encoding and reconstructing the geometry.
 
-In this work, we explore adversarial examples at a geometric level. That is, a small change to a clean source point cloud leads, after passing through an autoencoder model, to a shape from a different target class. On the defense side, we show that remnants of the attack's target shape are still present at the reconstructed output after applying the defense to the adversarial input.
+In this work, we are the first to consider the problem of adversarial examples at a geometric level. In this setting, the question is how to craft a small change to a clean source point cloud that leads, after passing through an autoencoder model, to the reconstruction of a different target shape. Our attack is in sharp contrast to existing semantic attacks on 3D point clouds. While such works aim to modify the predicted label by a classifier, we alter the entire reconstructed geometry. Additionally, we demonstrate the robustness of our attack in the case of defense, where we show that remnant characteristics of the target shape are still present at the output after applying the defense to the adversarial input.
 
 ## Citation
 If you find our work useful in your research, please consider citing:
@@ -30,8 +30,8 @@ git clone https://github.com/itailang/geometric_adv.git
 
 Create a conda environment and install dependencies:
 ```bash
-conda create -n py36tensorflow113pytorch16 python=3.6 --yes
-conda activate py36tensorflow113pytorch16
+conda create -n geometric_adv python=3.6 --yes
+conda activate geometric_adv
 cd geometric_adv
 cat requirements.txt | xargs -n 1 pip install
 conda install pytorch==1.6.0 torchvision==0.7.0 cudatoolkit=10.1 -c pytorch --yes
@@ -52,7 +52,7 @@ cd geometric_adv
 sh compile_op_pt.sh
 ```
 
-The compilation results should be created under `transfer/atlasnet/build` folder.  
+The compilation results should be created under `transfer/atlasnet/build` folder.
 
 ## Usage
 
@@ -78,9 +78,9 @@ bash download_models_and_data.sh
 ```
 
 The models (about 200MB) will be saved under `log` folder, in the following folders:
-* `autoencoder_victim`: a victim autoencoder for attack and defense experiments.
-* `pointnet`: a classifier for semantic interpretation experiment.
-* `autoencoder_for_transfer`, `atlasnet_for_transfer`, and `foldingnet_for_transfer`: autoencoders for attack transfer experiment. 
+* `autoencoder_victim`: a victim autoencoder for the attack and defense experiments.
+* `pointnet`: a classifier for the semantic interpretation experiment.
+* `autoencoder_for_transfer`, `atlasnet_for_transfer`, and `foldingnet_for_transfer`: autoencoders for the attack transfer experiment. 
 
 The data (about 220MB) will be saved under `log/autoencoder_victim/eval` folder.
 
@@ -145,7 +145,7 @@ sh runner_classifier.sh
 
 The script `runner_classifier.sh` uses the following scripts:
 * `run_classifier.py` gets the classifier's predictions for reconstructed adversarial and defended point clouds. The classifier's results will be saved under the corresponding attack and defense folders to a folder named `classifer_res`. Under this folder, there is a folder for each source class with the classifier's predictions.
-* `evaluate_classifier.py` evaluates the semantic interpretation of the reconstructed point clouds. Statistics for the classifier will be saved to the file `classifer_res/over_classes/eval_stats.txt`. 
+* `evaluate_classifier.py` evaluates the semantic interpretation of the reconstructed point clouds. Statistics for the classifier will be saved to the folder `classifer_res/over_classes`. 
 
 Note:
 * The semantic interpretation of reconstructed source and target point clouds is also evaluated (for reference). The name for the classifier's folder, in this case, is `classifer_res_orig`.
@@ -199,7 +199,7 @@ cd ../autoencoder
 sh runner_ae_for_classifier.sh
 ```
 
-This script uses the victim autoencoder to reconstruct point clouds of the train and validation sets that were used during its training. These reconstructions and their labels will be used for training the classifier. The data will be saved to the folders `log/autoencoder_victim/eval_train` and `log/autoencoder_victim/eval_val`. Note that the script also saves the original point clouds of the train the validation sets. They will be used for the training of autoencoders for transfer (see seb-section Autoencoders for Attack Transfer below).
+This script saves the point clouds of the train and validation sets that were used during the victim autoencoder's training. These points clouds and their labels will be used for training the classifier. The data will be saved to the folders `log/autoencoder_victim/eval_train` and `log/autoencoder_victim/eval_val`. Note that these point clouds of the train the validation sets will be used for the training of autoencoders for transfer (see seb-section [Autoencoders for Attack Transfer](#autoencoders-for-attack-transfer) below).
 
 Then, train the classifier using:
 ```bash

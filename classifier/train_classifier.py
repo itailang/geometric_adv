@@ -30,7 +30,7 @@ parser.add_argument('--gpu', type=int, default=0, help='GPU to use [default: GPU
 parser.add_argument('--model', default='pointnet_cls', help='Model name: pointnet_cls or pointnet_cls_basic [default: pointnet_cls]')
 parser.add_argument('--log_dir', default='log/pointnet', help='Log dir [default: log/pointnet]')
 parser.add_argument('--num_point', type=int, default=2048, help='Point Number [256/512/1024/2048] [default: 2048]')
-parser.add_argument('--max_epoch', type=int, default=140, help='Epoch to run [default: 140]')
+parser.add_argument('--max_epoch', type=int, default=150, help='Epoch to run [default: 150]')
 parser.add_argument('--batch_size', type=int, default=32, help='Batch Size during training [default: 32]')
 parser.add_argument('--learning_rate', type=float, default=0.001, help='Initial learning rate [default: 0.001]')
 parser.add_argument('--momentum', type=float, default=0.9, help='Initial learning rate [default: 0.9]')
@@ -39,12 +39,12 @@ parser.add_argument('--decay_step', type=int, default=200000, help='Decay step f
 parser.add_argument('--decay_rate', type=float, default=0.7, help='Decay rate for lr decay [default: 0.7]')
 parser.add_argument('--save_model_interval', type=int, default=10, help='Inteval between epochs, used for saving the model [default: 10]')
 parser.add_argument('--num_classes', type=int, default=13, help='Number of classes [default: 13]')
-parser.add_argument('--train_data', type=str, default='log/autoencoder_victim/eval_train/reconstructions_train_set_13l.npy',
-                    help='Path to training data [default: log/autoencoder_victim/eval_train/reconstructions_train_set_13l.npy]')
+parser.add_argument('--train_data', type=str, default='log/autoencoder_victim/eval_train/point_clouds_train_set_13l.npy',
+                    help='Path to training data [default: log/autoencoder_victim/eval_train/point_clouds_train_set_13l.npy]')
 parser.add_argument('--train_labels', type=str, default='log/autoencoder_victim/eval_train/pc_label_train_set_13l.npy',
                     help='Path to training labels [default: log/autoencoder_victim/eval_train/pc_label_train_set_13l.npy]')
-parser.add_argument('--val_data', type=str, default='log/autoencoder_victim/eval_val/reconstructions_val_set_13l.npy',
-                    help='Path to validation data [default: log/autoencoder_victim/eval_val/reconstructions_val_set_13l.npy]')
+parser.add_argument('--val_data', type=str, default='log/autoencoder_victim/eval_val/point_clouds_val_set_13l.npy',
+                    help='Path to validation data [default: log/autoencoder_victim/eval_val/point_clouds_val_set_13l.npy]')
 parser.add_argument('--val_labels', type=str, default='log/autoencoder_victim/eval_val/pc_label_val_set_13l.npy',
                     help='Path to validation labels [default: log/autoencoder_victim/eval_val/pc_label_val_set_13l.npy]')
 parser.add_argument('--model_path', default=None, help='model checkpoint file path - in case of loading pretrained model to continue training [default: None]')
