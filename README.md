@@ -15,11 +15,12 @@ In this work, we are the first to consider the problem of adversarial examples a
 ## Citation
 If you find our work useful in your research, please consider citing:
 
-    @article{lang2020geometric_adv,
+    @InProceedings{lang2021geometric_adv,
       author = {Lang, Itai and Kotlicki, Uriel and Avidan, Shai},
       title = {{Geometric Adversarial Attacks and Defenses on 3D Point Clouds}},
-      journal = {arXiv preprint arXiv:2012.05657},
-      year = {2020}
+      booktitle = {Proceedings of the International Conference on 3D Vision (3DV)},
+      pages = {1196--1205},
+      year = {2021}
     }
 
 ## Installation
