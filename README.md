@@ -3,6 +3,8 @@ Created by Itai Lang, Uriel Kotlicki, and Shai Avidan from Tel Aviv University.
 
 ![teaser](https://github.com/itailang/geometric_adv/blob/master/doc/teaser.png)
 
+[[Paper]](https://arxiv.org/abs/2012.05657) [[Video]](https://youtu.be/20WMZ6wSx8o) [[Slides]](https://github.com/itailang/geometric_adv/blob/master/doc/slides.pdf) [[Poster]](https://github.com/itailang/geometric_adv/blob/master/doc/poster.pdf)
+
 ## Introduction
 This code repository is based on our [arXiv tech report](https://arxiv.org/abs/2012.05657). Please read it for more information.
 
