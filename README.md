@@ -1,7 +1,7 @@
 # Geometric Adversarial Attacks and Defenses on 3D Point Clouds
 Created by Itai Lang, Uriel Kotlicki, and Shai Avidan from Tel Aviv University.
 
-[[Paper]](https://arxiv.org/abs/2012.05657) [[Video]](https://youtu.be/20WMZ6wSx8o) [[Slides]](./doc/slides.pdf) [[Poster]](./doc/poster.pdf)
+[[Paper]](https://arxiv.org/abs/2012.05657) [[Introduction Video (2 minutes)]](https://slideslive.com/38972228/geometric-adversarial-attacks-and-defenses-on-3d-point-clouds?ref=account-96722-latest) [[Introduction Slides]](./doc/introduction_slides.pdf) [[Full Video (10 minutes)]](https://slideslive.com/38972369/geometric-adversarial-attacks-and-defenses-on-3d-point-clouds?ref=account-96722-latest) [[Full Slides]](./doc/full_slides.pdf) [[Poster]](./doc/poster.pdf)
 
 ![teaser](./doc/teaser.png)
 
